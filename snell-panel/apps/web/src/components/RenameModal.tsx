@@ -3,7 +3,8 @@ import { Button, Input, Label, Modal, TextField } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { NodeDTO, PatchNodeInput } from "@snell-panel/shared";
 import { api } from "../api/client";
-import { nodeQueryKey } from "../api/hooks";
+import { nodeQueryKey, useTagCounts } from "../api/hooks";
+import { TagInput } from "./TagInput";
 
 export function RenameModal({
   node,
@@ -17,6 +18,9 @@ export function RenameModal({
   const qc = useQueryClient();
   const [name, setName] = useState(node.node_name);
   const [ip, setIp] = useState(node.ip ?? "");
+  const [tags, setTags] = useState<string[]>(node.tags);
+  const suggestions = useTagCounts().map((t) => t.tag);
+  const tagsChanged = tags.join("\u0000") !== node.tags.join("\u0000");
   const [error, setError] = useState("");
 
   const mutation = useMutation({
@@ -24,6 +28,7 @@ export function RenameModal({
       const body: PatchNodeInput = {};
       if (name.trim() && name.trim() !== node.node_name) body.node_name = name.trim();
       if (ip.trim() && ip.trim() !== (node.ip ?? "")) body.ip = ip.trim();
+      if (tagsChanged) body.tags = tags;
       return api.patchNode(node.node_id, body);
     },
     onSuccess: () => {
@@ -37,7 +42,8 @@ export function RenameModal({
     setError("");
     const changed =
       (name.trim() && name.trim() !== node.node_name) ||
-      (ip.trim() && ip.trim() !== (node.ip ?? ""));
+      (ip.trim() && ip.trim() !== (node.ip ?? "")) ||
+      tagsChanged;
     if (!changed) return onOpenChange(false);
     mutation.mutate();
   }
@@ -60,6 +66,7 @@ export function RenameModal({
                 <Label>IP / Host</Label>
                 <Input placeholder="changing this re-resolves geo" />
               </TextField>
+              <TagInput value={tags} onChange={setTags} suggestions={suggestions} />
               {error && <p className="text-sm text-danger">{error}</p>}
             </div>
           </Modal.Body>

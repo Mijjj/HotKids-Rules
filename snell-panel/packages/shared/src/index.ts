@@ -79,6 +79,13 @@ export interface NodeDTO {
 /*  Request schemas                                                           */
 /* -------------------------------------------------------------------------- */
 
+/** Node tags: trimmed, 1–32 chars each, de-duplicated, at most 20 per node. */
+export const MAX_TAGS = 20;
+export const tagsSchema = z
+  .array(z.string().trim().min(1).max(32))
+  .max(MAX_TAGS)
+  .transform((tags) => [...new Set(tags)]);
+
 const hostSchema = z
   .string()
   .trim()
@@ -109,7 +116,7 @@ export const createNodeSchema = z
     tfo: z.boolean().optional().default(true),
     vendor: z.string().trim().max(64).optional(),
     region: z.string().trim().max(64).optional(),
-    tags: z.array(z.string().trim().min(1).max(32)).optional(),
+    tags: tagsSchema.optional(),
     expire_at: z.coerce.number().int().positive().optional(),
     remark: z.string().trim().max(500).optional(),
   })
@@ -143,7 +150,7 @@ export const patchNodeSchema = z
     enabled: z.boolean().optional(),
     vendor: z.string().trim().max(64).nullable().optional(),
     region: z.string().trim().max(64).nullable().optional(),
-    tags: z.array(z.string().trim().min(1).max(32)).optional(),
+    tags: tagsSchema.optional(),
     expire_at: z.coerce.number().int().positive().nullable().optional(),
     remark: z.string().trim().max(500).nullable().optional(),
   })

@@ -8,6 +8,7 @@ import { addrText, countryFlag, maskHost } from "../lib/format";
 import { CommandModal } from "./CommandModal";
 import { RelayModal } from "./RelayModal";
 import { RenameModal } from "./RenameModal";
+import { TagChips } from "./TagInput";
 
 type Action = {
   type: "install" | "upgrade" | "relay" | "rename";
@@ -108,8 +109,9 @@ function NodeCard({
           <p className="truncate font-medium">
             {countryFlag(n.country_code)} {n.node_name}
           </p>
-          <div className="mt-1.5">
+          <div className="mt-1.5 flex flex-wrap gap-1">
             <StatusChips n={n} />
+            <TagChips tags={n.tags} />
           </div>
         </div>
         <RowActions n={n} onInstall={onInstall} onMenu={onMenu} />
@@ -226,7 +228,14 @@ export function NodesTable({ privacy }: { privacy: boolean }) {
                 {list.map((n) => (
                   <Table.Row key={n.node_id} id={n.node_id}>
                     <Table.Cell>
-                      {countryFlag(n.country_code)} {n.node_name}
+                      <div>
+                        {countryFlag(n.country_code)} {n.node_name}
+                      </div>
+                      {n.tags.length > 0 && (
+                        <div className="mt-1">
+                          <TagChips tags={n.tags} />
+                        </div>
+                      )}
                     </Table.Cell>
                     <Table.Cell>
                       <StatusChips n={n} />

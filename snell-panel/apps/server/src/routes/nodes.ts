@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { and, asc, desc, eq, like } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import {
   DEFAULT_SS2022_METHOD,
   createNodeSchema,
@@ -15,7 +15,7 @@ import type { AppEnv } from "../env";
 import { requireAccess, requireAccessOrApiToken } from "../middleware/auth";
 import { toNodeDTO } from "../lib/dto";
 import { expectedPurpose, mintToken } from "../lib/token";
-import { getNode, nowSeconds as now } from "../lib/node-repo";
+import { getNode, hasTag, nowSeconds as now } from "../lib/node-repo";
 import { snellVersionFor } from "../lib/versions";
 import { buildCommand } from "../lib/command";
 import { lookupGeo } from "../lib/geoip";
@@ -31,7 +31,7 @@ router.get("/", requireAccess, async (c) => {
   if (q.protocol) filters.push(eq(nodes.protocol, q.protocol));
   if (q.status) filters.push(eq(nodes.status, q.status));
   if (q.enabled === "true" || q.enabled === "false") filters.push(eq(nodes.enabled, q.enabled === "true"));
-  if (q.tag) filters.push(like(nodes.tags, `%"${q.tag}"%`));
+  if (q.tag) filters.push(hasTag(q.tag));
 
   const sort = q.sort;
   const sortColumn = sort === "registered_at" ? nodes.registeredAt : sort === "expire_at" ? nodes.expireAt : nodes.createdAt;

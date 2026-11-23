@@ -19,7 +19,8 @@ import {
   type SS2022Method,
 } from "@snell-panel/shared";
 import { api } from "../api/client";
-import { nodeQueryKey } from "../api/hooks";
+import { nodeQueryKey, useTagCounts } from "../api/hooks";
+import { TagInput } from "./TagInput";
 
 export function AddNodeModal({
   isOpen,
@@ -37,6 +38,8 @@ export function AddNodeModal({
   const [ip, setIp] = useState("");
   const [port, setPort] = useState("");
   const [tfo, setTfo] = useState(true);
+  const [tags, setTags] = useState<string[]>([]);
+  const suggestions = useTagCounts().map((t) => t.tag);
   const [error, setError] = useState("");
 
   function reset() {
@@ -48,6 +51,7 @@ export function AddNodeModal({
     setIp("");
     setPort("");
     setTfo(true);
+    setTags([]);
     setError("");
   }
 
@@ -61,6 +65,7 @@ export function AddNodeModal({
       }
       if (prefill && ip.trim()) body.ip = ip.trim();
       if (prefill && port.trim()) body.port = Number(port);
+      if (tags.length) body.tags = tags;
       return api.createNode(body);
     },
     onSuccess: () => {
@@ -163,6 +168,8 @@ export function AddNodeModal({
                 <Label>Node name</Label>
                 <Input placeholder="e.g. Tokyo 01" />
               </TextField>
+
+              <TagInput value={tags} onChange={setTags} suggestions={suggestions} />
 
               <Switch isSelected={prefill} onChange={setPrefill}>
                 <Switch.Control>

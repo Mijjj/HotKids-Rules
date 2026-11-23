@@ -9,6 +9,7 @@ import type { AppEnv } from "../env";
 import { extractToken, safeEqual } from "../middleware/auth";
 import { getSubscribeToken } from "../lib/settings";
 import { renderSubscription } from "../lib/subscription";
+import { hasTag } from "../lib/node-repo";
 
 const router = new Hono<AppEnv>();
 
@@ -34,7 +35,7 @@ router.get("/", async (c) => {
   for (const key of structured) {
     const value = c.req.query(key);
     if (!value) continue;
-    if (key === "tag") predicates.push(like(nodes.tags, `%"${value}"%`));
+    if (key === "tag") predicates.push(hasTag(value));
     if (key === "region") predicates.push(eq(nodes.region, value));
     if (key === "vendor") predicates.push(eq(nodes.vendor, value));
     if (key === "protocol") predicates.push(eq(nodes.protocol, value));
