@@ -95,7 +95,8 @@ openport(){ local p=$1 r=$2; command -v firewall-cmd >/dev/null && firewall-cmd 
 
 sn_arch(){ case "$(uname -m)" in x86_64) echo amd64;; aarch64|arm64) echo aarch64;; i386|i686) echo i386;; armv7l|armv7) echo armv7l;; *) die "Unsupported arch";; esac; }
 open_arch(){ case "$(uname -m)" in x86_64) echo amd64;; aarch64|arm64) echo arm64;; i386|i686) echo 386;; armv7l|armv7) echo armv7;; *) die "Unsupported arch";; esac; }
-ss_arch(){ case "$(uname -m)" in x86_64) echo x86_64-unknown-linux-gnu;; aarch64|arm64) echo aarch64-unknown-linux-gnu;; armv7l|armv7) echo armv7-unknown-linux-gnueabihf;; armv6l) echo arm-unknown-linux-gnueabi;; i386|i686) echo i686-unknown-linux-musl;; *) die "Unsupported arch";; esac; }
+# musl builds are statically linked: the gnu builds need a recent glibc (v1.25.0 needs 2.39) and fail on Debian 12.
+ss_arch(){ case "$(uname -m)" in x86_64) echo x86_64-unknown-linux-musl;; aarch64|arm64) echo aarch64-unknown-linux-musl;; armv7l|armv7) echo armv7-unknown-linux-musleabihf;; armv6l) echo arm-unknown-linux-musleabi;; i386|i686) echo i686-unknown-linux-musl;; *) die "Unsupported arch";; esac; }
 
 dl_snell(){
   mkdir -p "$SNDIR"; tmp=$(mktemp -d)
